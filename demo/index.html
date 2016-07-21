@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF8">
+<meta name="renderer" content="webkit">
+<title>mqycn/ng-pagination 演示</title>
+<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<script src="js/angular.min.js"></script>
+<style>
+body{background:#EEE;}
+
+.demo{padding:5px 10px;background:#FFF;margin:20px;text-align:center;border:solid 1px #CCC;border-radius:10px;}
+.pagination-box .pagination{margin-right:10px;}
+</style>
+</head>
+<body ng-app="main" ng-controller="main">
+
+<div id="demo" class="demo">
+  <h2>模拟表单参数</h2>
+  <form class="form-inline" action="?">
+    <div class="form-group">
+      <label>排序：</label>
+      <input type="text" name="sort" class="form-control" ng-model="query.sort">
+    </div>
+    <div class="form-group">
+      <label>关键字：</label>
+      <input type="text" name="key" class="form-control" ng-model="query.key">
+    </div>
+    <div class="form-group">
+      <label>当前页：</label>
+      <input type="text" name="page" class="form-control" ng-model="query.page">
+    </div>
+    <div class="form-group">
+      <label>其他：</label>
+      <input type="text" name="other" class="form-control" ng-model="query.other">
+    </div>
+    <button type="submit" class="btn btn-default">测试</button>
+  </form>
+</div>
+
+<script>
+if(location.search == ""){
+	location.href = "?sort=new&key=abc&page=50";
+}; 
+var app = angular.module('main', []);
+app.controller("main", ["$scope", function($scope){
+	$scope.query = {urlTemplate : ""}, arr = [];
+	$scope.query.list = (location.search == "" ? "?" : location.search).substr(1).split("&");
+	for( var i = 0 ; i < $scope.query.list.length ; i++){
+		if( $scope.query.list[i].indexOf("=") != -1 ){
+			arr = $scope.query.list[i].split("=");
+			$scope.query[arr[0]] = decodeURIComponent($scope.query.list[i].substr(arr[0].length+1));
+			if( arr[0] != "page" ){
+				$scope.query.urlTemplate += "&" + $scope.query.list[i];
+			}
+		}
+	}
+	$scope.query.urlTemplate = "?page={PAGE}" + $scope.query.urlTemplate;
+	if( !$scope.query.page ){
+		$scope.pageId = 54;
+	}else{
+		$scope.pageId = parseInt($scope.query.page);
+	}
+	$scope.recordCount = 1000;
+	$scope.urlTemplate = $scope.query.urlTemplate;
+}]);
+</script>
+<script src="../src/page-pagination.js"></script>
+
+<!-- DEMO1 Start-->
+<div id="demo1" class="demo" ng-controller="pagination-demo1">
+  <h2>不指定 分页大小</h2>
+  <page-pagination page-id="pageId" page-record="recordCount" page-url-template="urlTemplate" ></page-pagination>
+</div>
+<script>
+app.controller("pagination-demo1", ["$scope", function($scope){
+}]);
+</script>
+<!-- DEMO1 End -->
+
+<!-- DEMO2 Start-->
+<div id="demo2" class="demo" ng-controller="pagination-demo2">
+  <h2>自定义 分页大小</h2>
+  <page-pagination page-id="pageId" page-size="pageSize" page-record="recordCount" page-url-template="urlTemplate" ></page-pagination>
+</div>
+<script>
+app.controller("pagination-demo2", ["$scope", function($scope){
+	$scope.pageSize = 8;
+}]);
+</script>
+<!-- DEMO2 End -->
+
+</body>
+</html>
